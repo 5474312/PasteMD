@@ -101,6 +101,7 @@
     "workflow.md.paste_success": "Pasted using Markdown format.",
     "workflow.latex.paste_success": "Pasted using LaTeX format.",
     "workflow.file.paste_success": "Pasted using file format.",
+    "workflow.youdao.paste_success": "Pasted using Youdao Cloud Note format.",
     "settings.extensions.latex_title": "LaTeX Paste",
     "settings.extensions.latex_enable": "Enable LaTeX paste",
     "settings.extensions.file_title": "File Paste",

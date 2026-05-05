@@ -101,6 +101,7 @@
     "workflow.md.paste_success": "Markdown 形式でペーストしました。",
     "workflow.latex.paste_success": "LaTeX 形式でペーストしました。",
     "workflow.file.paste_success": "ファイル形式でペーストしました。",
+    "workflow.youdao.paste_success": "Youdao Cloud Note 形式でペーストしました。",
     "settings.extensions.latex_title": "LaTeX ペースト",
     "settings.extensions.latex_enable": "LaTeX ペーストを有効にする",
     "settings.extensions.file_title": "ファイルペースト",

@@ -9,6 +9,7 @@ from .html_md_workflow import HtmlWorkflow
 from .md_workflow import MdWorkflow
 from .latex_workflow import LatexWorkflow
 from .file_workflow import FileWorkflow
+from .youdao_workflow import YoudaoWorkflow
 
 __all__ = [
     "ExtensibleWorkflow",
@@ -16,4 +17,5 @@ __all__ = [
     "MdWorkflow",
     "LatexWorkflow",
     "FileWorkflow",
+    "YoudaoWorkflow",
 ]

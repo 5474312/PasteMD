@@ -28,6 +28,8 @@ def detect_active_app() -> str:
         return "onenote"
     elif "powerpnt" in process_name:
         return "powerpoint"
+    elif process_name == "有道云笔记.exe":
+        return "youdao"
     elif process_name == "et.exe":  # 独立的 WPS 表格进程(较少见)
         return "wps_excel"
     elif "wps" in process_name:  # WPS Office 统一进程

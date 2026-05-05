@@ -101,6 +101,7 @@
     "workflow.md.paste_success": "已使用 Markdown 格式粘贴。",
     "workflow.latex.paste_success": "已使用 LaTeX 格式粘贴。",
     "workflow.file.paste_success": "已使用文件格式粘贴。",
+    "workflow.youdao.paste_success": "已使用有道云笔记格式粘贴。",
     "settings.extensions.latex_title": "LaTeX 粘贴",
     "settings.extensions.latex_enable": "启用 LaTeX 粘贴",
     "settings.extensions.file_title": "文件粘贴",

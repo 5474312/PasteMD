@@ -8,7 +8,7 @@ from __future__ import annotations
 import sys
 from typing import Literal
 
-AppType = Literal["word", "wps", "excel", "wps_excel", "onenote", "powerpoint", ""]
+AppType = Literal["word", "wps", "excel", "wps_excel", "onenote", "powerpoint", "youdao", ""]
 
 # 根据平台导入对应的实现
 if sys.platform == "darwin":
@@ -132,6 +132,7 @@ def get_app_display_name(app_type: str) -> str:
         "excel": "Microsoft Excel",
         "wps": "WPS 文字",
         "wps_excel": "WPS 表格",
+        "youdao": "有道云笔记",
         "": "未知应用",
     }
     return display_names.get(app_type, app_type)

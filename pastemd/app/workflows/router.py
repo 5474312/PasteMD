@@ -11,7 +11,7 @@ from .word import WordWorkflow, WPSWorkflow
 from .excel import ExcelWorkflow, WPSExcelWorkflow
 from .fallback import FallbackWorkflow
 from .office_omml import OneNoteWorkflow, PowerPointWorkflow
-from .extensible import HtmlWorkflow, MdWorkflow, LatexWorkflow, FileWorkflow
+from .extensible import HtmlWorkflow, MdWorkflow, LatexWorkflow, FileWorkflow, YoudaoWorkflow
 
 
 class WorkflowRouter:
@@ -36,6 +36,7 @@ class WorkflowRouter:
             "wps_excel": WPSExcelWorkflow(),
             "onenote": OneNoteWorkflow(),
             "powerpoint": PowerPointWorkflow(),
+            "youdao": YoudaoWorkflow(),
             "": FallbackWorkflow(),  # 空字符串表示无应用/兜底
         }
         
