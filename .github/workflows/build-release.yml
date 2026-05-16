@@ -5,7 +5,6 @@ on:
   push:
     branches:
       - "ci/**"
-      - "codex/**"
     tags:
       - "v*"
 
@@ -108,7 +107,8 @@ jobs:
 
           identity_hash="$(
             security find-identity -v -p codesigning build.keychain \
-              | awk -F'[ )]+' '/Developer ID Application/ { print $2; exit }'
+              | sed -nE 's/^[[:space:]]*[0-9]+\)[[:space:]]+([A-Fa-f0-9]+)[[:space:]]+".*Developer ID Application.*"$/\1/p' \
+              | head -n 1
           )"
           if [[ -z "$identity_hash" ]]; then
             echo "Developer ID Application identity was not found in imported p12" >&2
