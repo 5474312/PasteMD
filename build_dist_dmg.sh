@@ -152,6 +152,10 @@ NUITKA_CMD=(
   --nofollow-import-to=tests
 )
 
+if has_nuitka_opt "--assume-yes-for-downloads"; then
+  NUITKA_CMD+=( --assume-yes-for-downloads )
+fi
+
 # 可选：写入版本号
 if has_nuitka_opt "--macos-app-version"; then
   NUITKA_CMD+=( --macos-app-version="$VERSION" )
