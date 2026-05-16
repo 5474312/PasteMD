@@ -37,14 +37,16 @@ jobs:
           python -m pip install -r requirements.txt
           python -m pip install --upgrade nuitka ordered-set zstandard
 
-      - name: Prepare bundled Pandoc
+      - name: Resolve Pandoc version
+        id: resolve-pandoc-macos
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          if [[ "$PANDOC_VERSION" == "latest" ]]; then
-            PANDOC_VERSION="$(
+          pandoc_version="$PANDOC_VERSION"
+          if [[ "$pandoc_version" == "latest" ]]; then
+            pandoc_version="$(
               curl -fsSL \
                 -H "Accept: application/vnd.github+json" \
                 -H "Authorization: Bearer $GH_TOKEN" \
@@ -53,8 +55,28 @@ jobs:
                 | python -c 'import json, sys; print(json.load(sys.stdin)["tag_name"].lstrip("v"))'
             )"
           fi
-          echo "Using Pandoc $PANDOC_VERSION"
+          echo "PANDOC_RESOLVED_VERSION=$pandoc_version" >> "$GITHUB_ENV"
+          echo "version=$pandoc_version" >> "$GITHUB_OUTPUT"
+          echo "Using Pandoc $pandoc_version"
 
+      - name: Cache bundled Pandoc
+        id: cache-pandoc-macos
+        uses: actions/cache@v4
+        with:
+          path: third_party/pandoc/macos
+          key: pandoc-macos-${{ runner.arch }}-${{ steps.resolve-pandoc-macos.outputs.version }}
+
+      - name: Cache Nuitka downloads
+        uses: actions/cache@v4
+        with:
+          path: ~/Library/Caches/Nuitka/Nuitka/Cache/downloads
+          key: nuitka-downloads-macos-${{ runner.arch }}-py${{ env.PYTHON_VERSION }}
+
+      - name: Prepare bundled Pandoc
+        if: steps.cache-pandoc-macos.outputs.cache-hit != 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
           arch="$(uname -m)"
           case "$arch" in
             arm64) pandoc_arch="arm64" ;;
@@ -62,7 +84,7 @@ jobs:
             *) echo "Unsupported macOS runner architecture: $arch" >&2; exit 1 ;;
           esac
 
-          url="https://github.com/jgm/pandoc/releases/download/${PANDOC_VERSION}/pandoc-${PANDOC_VERSION}-${pandoc_arch}-macOS.zip"
+          url="https://github.com/jgm/pandoc/releases/download/${PANDOC_RESOLVED_VERSION}/pandoc-${PANDOC_RESOLVED_VERSION}-${pandoc_arch}-macOS.zip"
           work_dir="$RUNNER_TEMP/pandoc-macos"
           rm -rf "$work_dir" third_party/pandoc/macos
           mkdir -p "$work_dir" third_party/pandoc/macos
@@ -79,6 +101,10 @@ jobs:
           pandoc_root="$(dirname "$(dirname "$pandoc_bin")")"
           ditto "$pandoc_root" third_party/pandoc/macos
           third_party/pandoc/macos/bin/pandoc --version
+
+      - name: Verify bundled Pandoc
+        shell: bash
+        run: third_party/pandoc/macos/bin/pandoc --version
 
       - name: Import Developer ID certificate
         env:
@@ -173,7 +199,8 @@ jobs:
         shell: pwsh
         run: choco install innosetup --no-progress -y
 
-      - name: Prepare bundled Pandoc
+      - name: Resolve Pandoc version
+        id: resolve-pandoc-windows
         shell: pwsh
         env:
           GH_TOKEN: ${{ github.token }}
@@ -190,7 +217,36 @@ jobs:
             $pandocVersion = $latest.tag_name.TrimStart("v")
           }
           Write-Host "Using Pandoc $pandocVersion"
+          "PANDOC_RESOLVED_VERSION=$pandocVersion" >> $env:GITHUB_ENV
+          "version=$pandocVersion" >> $env:GITHUB_OUTPUT
 
+      - name: Cache bundled Pandoc
+        id: cache-pandoc-windows
+        uses: actions/cache@v4
+        with:
+          path: third_party/pandoc/win
+          key: pandoc-windows-x64-${{ steps.resolve-pandoc-windows.outputs.version }}
+
+      - name: Cache Nuitka downloads
+        uses: actions/cache@v4
+        with:
+          path: ~\AppData\Local\Nuitka\Nuitka\Cache\downloads
+          key: nuitka-downloads-windows-${{ runner.arch }}-py${{ env.PYTHON_VERSION }}
+
+      - name: Cache Windows Nuitka build directory
+        uses: actions/cache@v4
+        with:
+          path: nuitka/main.build
+          key: nuitka-build-windows-${{ runner.arch }}-py${{ env.PYTHON_VERSION }}-${{ hashFiles('main.py', 'PasteMD.py', 'pastemd/**/*.py', 'requirements.txt') }}
+          restore-keys: |
+            nuitka-build-windows-${{ runner.arch }}-py${{ env.PYTHON_VERSION }}-
+
+      - name: Prepare bundled Pandoc
+        if: steps.cache-pandoc-windows.outputs.cache-hit != 'true'
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $pandocVersion = $env:PANDOC_RESOLVED_VERSION
           $url = "https://github.com/jgm/pandoc/releases/download/$pandocVersion/pandoc-$pandocVersion-windows-x86_64.zip"
           $workDir = Join-Path $env:RUNNER_TEMP "pandoc-windows"
           Remove-Item $workDir -Recurse -Force -ErrorAction SilentlyContinue
@@ -209,6 +265,10 @@ jobs:
 
           Copy-Item -Path (Join-Path $pandocExe.DirectoryName "*") -Destination "third_party\pandoc\win" -Recurse -Force
           & "third_party\pandoc\win\pandoc.exe" --version
+
+      - name: Verify bundled Pandoc
+        shell: pwsh
+        run: '& "third_party\pandoc\win\pandoc.exe" --version'
 
       - name: Build Nuitka standalone app
         shell: cmd
@@ -249,7 +309,7 @@ jobs:
           if (-not (Test-Path $iscc)) {
             throw "ISCC.exe not found: $iscc"
           }
-          & $iscc "/DMyAppVersion=`"$version`"" "installer.iss"
+          & $iscc "/DMyAppVersion=$version" "installer.iss"
 
       - name: Upload Windows artifact
         uses: actions/upload-artifact@v4
