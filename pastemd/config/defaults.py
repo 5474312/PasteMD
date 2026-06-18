@@ -70,6 +70,7 @@ DEFAULT_CONFIG: Dict[str, Any] = {
     "html_disable_first_para_indent": True,
     "markdown_hard_line_breaks": False,
     "horizontal_rule_style": "default",  # default=Pandoc 原生横线, paragraph_border=Office/WPS 段落边框线
+    "docx_auto_table_layout": False,  # 实验性：根据内容自动调整 Word/WPS 表格列宽
     "html_formatting": {
         "strikethrough_to_del": True,
     },

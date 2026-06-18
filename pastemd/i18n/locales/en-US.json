@@ -172,6 +172,8 @@
     "settings.conversion.latex_replacements_note": "(e.g., replace {\\kern 10pt} with \\qquad)",
     "settings.conversion.fix_single_dollar_block": "Auto-detect non-standard math blocks",
     "settings.conversion.fix_single_dollar_block_note": "(Convert single-line $ ... $ to $$ ... $$)",
+    "settings.conversion.docx_auto_table_layout": "Auto-adjust Word/WPS table column widths",
+    "settings.conversion.docx_auto_table_layout_note": "Experimental. Redistributes column widths based on table content, useful for short labels on the left and long content on the right.",
     "settings.conversion.pandoc_request_headers": "Pandoc request headers",
     "settings.conversion.pandoc_request_headers_enable": "Enable custom request headers (--request-header)",
     "settings.conversion.pandoc_request_headers_note": "One header per line, format: Name: Value. Useful for 403 image fetches (User-Agent/Referer).",

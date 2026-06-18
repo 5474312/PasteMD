@@ -172,6 +172,8 @@
     "settings.conversion.latex_replacements_note": "（例：{\\kern 10pt} を \\qquad に置換）",
     "settings.conversion.fix_single_dollar_block": "非標準のブロック数式を自動検出",
     "settings.conversion.fix_single_dollar_block_note": "（単独行の $ ... $ を $$ ... $$ に変換）",
+    "settings.conversion.docx_auto_table_layout": "Word/WPS 表の列幅を自動調整",
+    "settings.conversion.docx_auto_table_layout_note": "実験的機能。表の内容に基づいて列幅を再配分します。左に短いラベル、右に長い内容がある表に向いています。",
     "settings.conversion.pandoc_request_headers": "Pandoc request headers（リクエストヘッダー）",
     "settings.conversion.pandoc_request_headers_enable": "カスタム request headers（--request-header）を有効化",
     "settings.conversion.pandoc_request_headers_note": "1行に1ヘッダー、形式：Name: Value。画像リンクの 403（User-Agent/Referer が必要な場合など）対策。",

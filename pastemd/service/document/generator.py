@@ -204,11 +204,16 @@ class DocumentGenerator:
                 disable_first_para_indent=True,
                 target_style="Body Text",
                 horizontal_rule_style=config.get("horizontal_rule_style", "default"),
+                auto_layout_tables=config.get("docx_auto_table_layout", False),
             )
-        elif config.get("horizontal_rule_style") == "paragraph_border":
+        elif (
+            config.get("horizontal_rule_style") == "paragraph_border"
+            or config.get("docx_auto_table_layout", False)
+        ):
             docx_bytes = DocxProcessor.apply_custom_processing(
                 docx_bytes,
-                horizontal_rule_style="paragraph_border",
+                horizontal_rule_style=config.get("horizontal_rule_style", "default"),
+                auto_layout_tables=config.get("docx_auto_table_layout", False),
             )
         
         return docx_bytes
@@ -253,11 +258,16 @@ class DocumentGenerator:
                 disable_first_para_indent=True,
                 target_style="Body Text",
                 horizontal_rule_style=config.get("horizontal_rule_style", "default"),
+                auto_layout_tables=config.get("docx_auto_table_layout", False),
             )
-        elif config.get("horizontal_rule_style") == "paragraph_border":
+        elif (
+            config.get("horizontal_rule_style") == "paragraph_border"
+            or config.get("docx_auto_table_layout", False)
+        ):
             docx_bytes = DocxProcessor.apply_custom_processing(
                 docx_bytes,
-                horizontal_rule_style="paragraph_border",
+                horizontal_rule_style=config.get("horizontal_rule_style", "default"),
+                auto_layout_tables=config.get("docx_auto_table_layout", False),
             )
         
         return docx_bytes

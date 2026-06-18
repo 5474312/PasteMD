@@ -684,6 +684,20 @@ class SettingsDialog:
         fix_dollar_label = ttk.Label(frame, text=fix_dollar_note, foreground="gray", font=("", 8))
         fix_dollar_label.grid(row=4, column=0, sticky=tk.W, padx=(20, 0), pady=(0, 5))
 
+        self.docx_auto_table_layout_var = tk.BooleanVar(value=self.current_config.get("docx_auto_table_layout", False))
+        ttk.Checkbutton(
+            frame,
+            text=t("settings.conversion.docx_auto_table_layout"),
+            variable=self.docx_auto_table_layout_var,
+        ).grid(row=5, column=0, sticky=tk.W, pady=5)
+
+        ttk.Label(
+            frame,
+            text=t("settings.conversion.docx_auto_table_layout_note"),
+            foreground="gray",
+            font=("", 8),
+        ).grid(row=6, column=0, sticky=tk.W, padx=(20, 0), pady=(0, 5))
+
         # Pandoc request headers（用于下载远程图片等资源时附加请求头）
         self._pandoc_request_headers_example = [
             "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
@@ -702,20 +716,20 @@ class SettingsDialog:
             frame,
             text=t("settings.conversion.pandoc_request_headers"),
             font=("", 10, "bold"),
-        ).grid(row=5, column=0, sticky=tk.W, pady=(10, 5))
+        ).grid(row=7, column=0, sticky=tk.W, pady=(10, 5))
 
         ttk.Checkbutton(
             frame,
             text=t("settings.conversion.pandoc_request_headers_enable"),
             variable=self.pandoc_request_headers_enable_var,
             command=self._toggle_pandoc_request_headers_state,
-        ).grid(row=6, column=0, sticky=tk.W, pady=2)
+        ).grid(row=8, column=0, sticky=tk.W, pady=2)
 
         if not initial_headers:
             initial_headers = self._pandoc_request_headers_example
 
         headers_frame = ttk.Frame(frame)
-        headers_frame.grid(row=7, column=0, sticky=tk.EW, padx=(20, 0), pady=(0, 5))
+        headers_frame.grid(row=9, column=0, sticky=tk.EW, padx=(20, 0), pady=(0, 5))
         headers_frame.columnconfigure(0, weight=1)
 
         self.pandoc_request_headers_text = tk.Text(headers_frame, height=4, wrap="word")
@@ -735,13 +749,13 @@ class SettingsDialog:
             text=t("settings.conversion.pandoc_request_headers_note"),
             foreground="gray",
             font=("", 8),
-        ).grid(row=8, column=0, sticky=tk.W, padx=(20, 0), pady=(0, 5))
+        ).grid(row=10, column=0, sticky=tk.W, padx=(20, 0), pady=(0, 5))
 
         ttk.Button(
             frame,
             text=t("settings.conversion.pandoc_request_headers_fill_example"),
             command=self._fill_pandoc_request_headers_example,
-        ).grid(row=9, column=0, sticky=tk.W, padx=(20, 0), pady=(0, 5))
+        ).grid(row=11, column=0, sticky=tk.W, padx=(20, 0), pady=(0, 5))
 
     def _set_pandoc_request_headers_text(self, headers: list[str]) -> None:
         try:
@@ -957,6 +971,10 @@ class SettingsDialog:
             new_config["fix_single_dollar_block"] = self._get_var_value(
                 "fix_single_dollar_block_var",
                 self.current_config.get("fix_single_dollar_block", True),
+            )
+            new_config["docx_auto_table_layout"] = self._get_var_value(
+                "docx_auto_table_layout_var",
+                self.current_config.get("docx_auto_table_layout", False),
             )
 
             # pandoc_request_headers（实验性功能）
