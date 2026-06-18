@@ -2,6 +2,7 @@
 
 import io
 import zipfile
+from typing import Optional
 from xml.sax.saxutils import quoteattr
 from xml.etree import ElementTree as ET
 
@@ -172,13 +173,11 @@ class DocxProcessor:
                 DocxProcessor._register_xml_namespaces(xml_namespaces)
                 root = ET.fromstring(document_xml)
 
-                modified_count = 0
-                for table in DocxProcessor._iter_top_level_tables(root):
-                    widths = DocxProcessor._suggest_table_column_widths(table, namespaces)
-                    if not widths:
-                        continue
-                    DocxProcessor._apply_table_column_widths(table, widths, namespaces)
-                    modified_count += 1
+                modified_count = DocxProcessor._auto_layout_tables_in_element(
+                    root,
+                    namespaces,
+                    _DOCX_TABLE_WIDTH_TWIPS,
+                )
 
                 if modified_count == 0:
                     log("No eligible DOCX table found for auto layout")
@@ -264,22 +263,71 @@ class DocxProcessor:
         return xml_text.encode("utf-8")
 
     @staticmethod
-    def _iter_top_level_tables(root: ET.Element) -> list[ET.Element]:
+    def _auto_layout_tables_in_element(
+        element: ET.Element,
+        namespaces: dict,
+        available_width: int,
+    ) -> int:
         w = f"{{{_WORD_NS}}}"
-        tables: list[ET.Element] = []
+        modified_count = 0
 
-        def walk(element: ET.Element, inside_cell: bool) -> None:
-            for child in list(element):
-                child_inside_cell = inside_cell or child.tag == f"{w}tc"
-                if child.tag == f"{w}tbl" and not inside_cell:
-                    tables.append(child)
-                walk(child, child_inside_cell)
+        for child in list(element):
+            if child.tag == f"{w}tbl":
+                modified_count += DocxProcessor._auto_layout_table_with_nested(
+                    child,
+                    namespaces,
+                    available_width,
+                )
+            else:
+                modified_count += DocxProcessor._auto_layout_tables_in_element(
+                    child,
+                    namespaces,
+                    available_width,
+                )
 
-        walk(root, False)
-        return tables
+        return modified_count
 
     @staticmethod
-    def _suggest_table_column_widths(table: ET.Element, namespaces: dict) -> list[int]:
+    def _auto_layout_table_with_nested(
+        table: ET.Element,
+        namespaces: dict,
+        available_width: int,
+    ) -> int:
+        modified_count = 0
+        widths = DocxProcessor._suggest_table_column_widths(
+            table,
+            namespaces,
+            available_width,
+        )
+
+        if widths:
+            DocxProcessor._apply_table_column_widths(table, widths, namespaces)
+            modified_count += 1
+        else:
+            widths = DocxProcessor._existing_table_column_widths(table, namespaces)
+
+        for row in table.findall("./w:tr", namespaces):
+            cells = row.findall("./w:tc", namespaces)
+            for index, cell in enumerate(cells):
+                cell_width = DocxProcessor._cell_width(cell, namespaces)
+                if cell_width is None and index < len(widths):
+                    cell_width = widths[index]
+                if cell_width is None:
+                    cell_width = available_width
+                modified_count += DocxProcessor._auto_layout_tables_in_element(
+                    cell,
+                    namespaces,
+                    cell_width,
+                )
+
+        return modified_count
+
+    @staticmethod
+    def _suggest_table_column_widths(
+        table: ET.Element,
+        namespaces: dict,
+        total_width: int,
+    ) -> list[int]:
         rows = table.findall("./w:tr", namespaces)
         if not rows:
             return []
@@ -287,6 +335,8 @@ class DocxProcessor:
         row_cells = [row.findall("./w:tc", namespaces) for row in rows]
         column_count = max((len(cells) for cells in row_cells), default=0)
         if column_count < 2:
+            return []
+        if total_width < column_count:
             return []
 
         if DocxProcessor._has_merged_cells(row_cells, namespaces):
@@ -301,7 +351,36 @@ class DocxProcessor:
         if not any(scores):
             return []
 
-        return DocxProcessor._column_widths_from_scores(scores, _DOCX_TABLE_WIDTH_TWIPS)
+        return DocxProcessor._column_widths_from_scores(scores, total_width)
+
+    @staticmethod
+    def _existing_table_column_widths(table: ET.Element, namespaces: dict) -> list[int]:
+        widths: list[int] = []
+        for grid_col in table.findall("./w:tblGrid/w:gridCol", namespaces):
+            width = DocxProcessor._parse_twips(grid_col.get(f"{{{_WORD_NS}}}w"))
+            if width is None:
+                return []
+            widths.append(width)
+        return widths
+
+    @staticmethod
+    def _cell_width(cell: ET.Element, namespaces: dict) -> Optional[int]:
+        tc_width = cell.find("./w:tcPr/w:tcW", namespaces)
+        if tc_width is None:
+            return None
+        if tc_width.get(f"{{{_WORD_NS}}}type") not in (None, "dxa"):
+            return None
+        return DocxProcessor._parse_twips(tc_width.get(f"{{{_WORD_NS}}}w"))
+
+    @staticmethod
+    def _parse_twips(value: Optional[str]) -> Optional[int]:
+        if value is None:
+            return None
+        try:
+            width = int(value)
+        except ValueError:
+            return None
+        return width if width > 0 else None
 
     @staticmethod
     def _direct_cell_text(cell: ET.Element) -> str:
