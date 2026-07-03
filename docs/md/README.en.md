@@ -13,6 +13,9 @@
   <a href="../../LICENSE">
     <img src="https://img.shields.io/github/license/RICHQAQ/PasteMD?style=flat-square" alt="License">
   </a>
+  <a href="https://gitcode.com/RICHQAQ/PasteMD">
+    <img src="https://gitcode.com/RICHQAQ/PasteMD/star/badge.svg" alt="AtomGitStars">
+  </a>
   <img src="https://img.shields.io/badge/Python-3.12%2B-3776AB?style=flat-square&logo=python&logoColor=white" alt="Python 3.12+">
   <img src="https://img.shields.io/badge/Platform-Windows%20%7C%20Word%20%7C%20WPS-5e8d36?style=flat-square&logo=windows&logoColor=white" alt="Platform">
 </p>
